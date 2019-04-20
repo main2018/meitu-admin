@@ -104,6 +104,7 @@ export default {
       this.listLoading = false
       this.oldList = this.list.map(v => v.id)
       this.newList = this.oldList.slice()
+      console.log('list', this.list)
       this.$nextTick(() => {
         this.setSort()
       })

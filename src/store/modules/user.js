@@ -1,4 +1,5 @@
-import { login, logout, getInfo } from '@/api/user'
+// import { login, logout, getInfo } from '@/api/user'
+import { login, logout } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -34,6 +35,7 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
+        console.log('response', response)
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
@@ -47,28 +49,44 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
+      console.log('state.token', state.token)
+      const data = {
+        roles: ['admin'],
+        name: 'admin',
+        avatar: '',
+        introduction: '个人介绍'
+      }
 
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
+      commit('SET_ROLES', data.roles)
+      commit('SET_NAME', 'name')
+      commit('SET_AVATAR', '')
+      commit('SET_INTRODUCTION', 'introduction')
+      resolve(data)
 
-        const { roles, name, avatar, introduction } = data
+      // getInfo(state.token).then(response => {
+      //   const { data } = response
 
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
+      //   if (!data) {
+      //     reject('Verification failed, please Login again.')
+      //   }
 
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
+      //   data.roles = ['admin']
+      //   // const { roles, name, avatar, introduction } = data
+      //   const { roles } = data
+
+      //   // roles must be a non-empty array
+      //   if (!roles || roles.length <= 0) {
+      //     reject('getInfo: roles must be a non-null array!')
+      //   }
+
+      //   commit('SET_ROLES', roles)
+      //   commit('SET_NAME', 'name')
+      //   commit('SET_AVATAR', data && data.userinfo && data.userinfo.headImageUrl)
+      //   commit('SET_INTRODUCTION', 'introduction')
+      //   resolve(data)
+      // }).catch(error => {
+      //   reject(error)
+      // })
     })
   },
 

@@ -2,6 +2,8 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import { isMock } from 'config'
+import qs from 'qs'
 
 // create an axios instance
 const service = axios.create({
@@ -18,8 +20,12 @@ service.interceptors.request.use(
     if (store.getters.token) {
       // let each request carry token --['X-Token'] as a custom key.
       // please modify it according to the actual situation.
-      config.headers['X-Token'] = getToken()
+      // config.headers['X-Token'] = getToken()
+      config.headers['Authorization'] = getToken()
     }
+
+    if (!isMock) config.data = qs.stringify(config.data)
+
     return config
   },
   error => {
@@ -43,9 +49,12 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
+    const code = response.code || response.status
+    console.log('res:', response)
+    console.log('code:', code)
 
     // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
+    if (code !== (isMock ? 20000 : 200)) {
       Message({
         message: res.message || 'error',
         type: 'error',
@@ -53,7 +62,7 @@ service.interceptors.response.use(
       })
 
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+      if (code === 50008 || code === 50012 || code === 50014) {
         // to re-login
         MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
           confirmButtonText: 'Re-Login',

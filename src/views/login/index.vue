@@ -95,16 +95,17 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
-      } else {
-        callback()
-      }
+      callback()
+      // if (value.length < 6) {
+      //   callback(new Error('The password can not be less than 6 digits'))
+      // } else {
+      //   callback()
+      // }
     }
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '123'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -167,6 +168,7 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
+              console.log('1111111111111')
               this.$router.push({ path: this.redirect || '/' })
               this.loading = false
             })

@@ -1,10 +1,11 @@
 import request from '@/utils/request'
 
-export function fetchList(query) {
+export function fetchList() {
   return request({
-    url: '/article/list',
-    method: 'get',
-    params: query
+    url: '/album',
+    method: 'get'
+
+    // params: query
   })
 }
 
@@ -26,7 +27,7 @@ export function fetchPv(pv) {
 
 export function createArticle(data) {
   return request({
-    url: '/article/create',
+    url: '/album/add',
     method: 'post',
     data
   })
@@ -34,8 +35,16 @@ export function createArticle(data) {
 
 export function updateArticle(data) {
   return request({
-    url: '/article/update',
+    url: '/album/update',
     method: 'post',
     data
+  })
+}
+
+export function fetchTest() {
+  return request({
+    url: '/article/articlePage',
+    method: 'post',
+    params: { pageSize: 10, pageNum: 1 }
   })
 }

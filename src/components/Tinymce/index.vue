@@ -2,15 +2,31 @@
   <div :class="{fullscreen:fullscreen}" class="tinymce-container editor-container">
     <textarea :id="tinymceId" class="tinymce-textarea" />
     <div class="editor-custom-btn-container">
-      <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
+      <!-- <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" /> -->
+      <el-button icon="el-icon-upload" size="mini" type="primary" @click="dialogVisible=true">
+        上传图片
+      </el-button>
     </div>
+
+    <el-dialog :visible.sync="dialogVisible">
+      <editorImage v-if="dialogVisible" @success="addImage"></editorImage>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" :disabled="!src" @click="saveSrc">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import editorImage from './components/EditorImage'
+// import editorImage from './components/EditorImage'
+import editorImage from '@/components/EditorImage'
 import plugins from './plugins'
 import toolbar from './toolbar'
+
+// import { qiniuDomain, videoCover } from 'config/qiniu'
+import { qiniuDomain, videoCover } from 'config/qiniu'
+import { qiniuUpload } from '@/api/qiniu'
 
 export default {
   name: 'Tinymce',
@@ -45,6 +61,7 @@ export default {
   },
   data() {
     return {
+      dialogVisible: false,
       hasChange: false,
       hasInit: false,
       tinymceId: this.id,
@@ -52,7 +69,8 @@ export default {
       languageTypeList: {
         'en': 'en',
         'zh': 'zh_CN'
-      }
+      },
+      src: ''
     }
   },
   computed: {
@@ -120,7 +138,40 @@ export default {
           editor.on('FullscreenStateChanged', (e) => {
             _this.fullscreen = e.state
           })
+        },
+        // media_alt_source: false,
+        // media_poster: false,
+        /* eslint-disable */
+        media_live_embeds: true,
+        file_picker_types: 'media',
+        file_picker_callback: async (cb, value, meta) => {
+          // this.$nextTick(() => { document.querySelector('#editorVideo input').click() })
+          if (meta.filetype == 'media') {
+            const input = document.createElement('input')
+            input.setAttribute('type', 'file')
+            input.accept = 'video/*'
+
+            input.onchange = async e => {
+              const file = e.target.files[0]
+
+              tinymce.activeEditor.setProgressState(true)
+              const url = await qiniuUpload(file)
+              tinymce.activeEditor.setProgressState(false)
+              cb(url, {source2: url, poster: url + videoCover})
+              // cb(url, {title: file.name})
+            }
+            input.click()
+            // callback('movie.mp4', {source2: 'alt.ogg', poster: 'image.jpg'});
+          }
+        },
+        video_template_callback: function(data) {
+          console.log('data', data)
+          return `<video src="${data.source1}" width="${data.width}" height="${data.height}" poster="${data.poster}" controls="controls></video>`
+          // return '<video width="' + data.width + '" height="' + data.height + '"' + (data.poster ? ' poster="' + data.poster + '"' : '') + ' controls="controls">\n' + '<source src="' + data.source1 + '"' + (data.source1mime ? ' type="' + data.source1mime + '"' : '') + ' />\n' + (data.source2 ? '<source src="' + data.source2 + '"' + (data.source2mime ? ' type="' + data.source2mime + '"' : '') + ' />\n' : '') + '</video>';
         }
+        // video_template_callback: function(data) {
+        //   console.log('video_template_callback')
+        // }
         // 整合七牛上传
         // images_dataimg_filter(img) {
         //   setTimeout(() => {
@@ -177,6 +228,15 @@ export default {
       arr.forEach(v => {
         window.tinymce.get(_this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`)
       })
+    },
+    saveSrc() {
+      const html = `<img class="wscnph" src="${this.src}" >`
+      window.tinymce.get(this.tinymceId).insertContent(html)
+      this.dialogVisible = false
+    },
+    addImage(key) {
+      this.src = qiniuDomain + key
+      // window.tinymce.get(this.tinymceId).insertContent(`<img class="wscnph" src="${qiniuDomain + key}" >`)
     }
   }
 }
@@ -199,6 +259,9 @@ export default {
   right: 4px;
   top: 4px;
   /*z-index: 2005;*/
+}
+.editor-custom-btn-container.video{
+  right: 120px;
 }
 .fullscreen .editor-custom-btn-container {
   z-index: 10000;
