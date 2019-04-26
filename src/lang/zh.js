@@ -63,7 +63,10 @@ export default {
     i18n: '国际化',
     externalLink: '外链',
     article: '文章',
-    articleTypes: '文章类型'
+    articleTypes: '文章类型',
+    setting: '设置',
+    'about-us': '关于我们',
+    site: '网站设置'
   },
   navbar: {
     logOut: '退出登录',
@@ -171,5 +174,10 @@ export default {
     tagsView: '开启 Tags-View',
     fixedHeader: '固定 Header',
     sidebarLogo: '侧边栏 Logo'
+  },
+  article: {
+    status: '状态',
+    title: '标题',
+    actions: '操作'
   }
 }

@@ -169,5 +169,10 @@ export default {
     tagsView: 'Open Tags-View',
     fixedHeader: 'Fixed Header',
     sidebarLogo: 'Sidebar Logo'
+  },
+  article: {
+    status: 'Status',
+    title: 'Title',
+    actions: 'Actions'
   }
 }

@@ -1,7 +1,7 @@
 'use strict'
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
-const { isMock } = require('./config')
+const { isMock, REMOTE_ADDRESS } = require('./config')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -36,7 +36,7 @@ module.exports = {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
         // target: `http://localhost:${port}/mock`,
-        target: isMock ? `http://localhost:${port}/mock` : `http://112.74.47.86:3000`,
+        target: isMock ? `http://localhost:${port}/mock` : REMOTE_ADDRESS,
         changeOrigin: true,
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''

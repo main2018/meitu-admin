@@ -50,8 +50,6 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     const code = response.code || response.status
-    console.log('res:', response)
-    console.log('code:', code)
 
     // if the custom code is not 20000, it is judged as an error.
     if (code !== (isMock ? 20000 : 200)) {

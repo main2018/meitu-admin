@@ -3,11 +3,11 @@
     <el-upload
       class="upload-demo"
       action="http://up-z2.qiniu.com"
-      :multiple="multiple"
+      :multiple="limit !== 1 || multiple"
       :file-list="fileList2"
       :list-type="isVideo ? 'text' : 'picture-card'"
       :data="uptoken"
-      :limit="1"
+      :limit="limit"
       :before-upload="beforeUpload"
       :on-change="handleChange"
       :on-preview="handlePreview"
@@ -51,6 +51,10 @@ export default {
     accept: {
       type: String,
       default: ''
+    },
+    limit: {
+      type: Number,
+      default: 1
     }
   },
   data() {
@@ -90,10 +94,10 @@ export default {
         if (resp.data) {
           this.uptoken.token = resp.data.token
 
-          const spaceReg = /\s/g
+          const spaceReg = /\s|\(|\)/g
           const key = Date.now() + this.makeRandom() + file.name.replace(spaceReg, '')
 
-          console.log('key', key)
+          // console.log('key', key)
           this.uptoken.key = key
           resolve()
         } else {
@@ -109,8 +113,9 @@ export default {
       return Number((num + arr.join()).substring(0, size))
     },
     handleRemove(file, fileList) {
-      // console.log(file, fileList);
+      const key = (file.response && file.response.key) || file.name
       this.$emit('change', fileList)
+      this.$emit('remove', key)
     },
     handleSuccess(resp, file, fileList) {
       // console.log(resp, file, fileList)
@@ -122,7 +127,7 @@ export default {
         this.$emit('success', file)
         return
       }
-      console.log('file', file)
+      // console.log('file', file)
       this.$emit('change', fileList)
 
       const key = (file.response && file.response.key) || file.name

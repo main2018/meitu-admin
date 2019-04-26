@@ -31,6 +31,13 @@ export function updateType(data) {
   })
 }
 
+export function addSubcategory(data) {
+  return request({
+    url: '/subcategory/add',
+    method: 'post',
+    data
+  })
+}
 export function delSubcategory(data) {
   return request({
     url: '/subcategory/del',

@@ -348,3 +348,13 @@ export function removeClass(ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+export function sortCompare(prop, rise = true) { // 排序
+  return (pre, next) => {
+    const obj1 = pre[prop]
+    const obj2 = next[prop]
+    const riseVal = obj1 < obj2 ? -1 : (obj1 > obj2 ? 1 : 0)
+    const downVal = obj1 < obj2 ? 1 : (obj1 > obj2 ? -1 : 0)
+    return rise ? riseVal : downVal
+  }
+}

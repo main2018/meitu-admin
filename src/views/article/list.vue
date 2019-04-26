@@ -31,13 +31,13 @@
         </template>
       </el-table-column> -->
 
-      <el-table-column class-name="status-col" label="Status" width="100">
+      <el-table-column class-name="status-col" :label="$t('article.status')" width="100">
         <template slot-scope="{row}">
           {{ row.status | statusFilter }}
         </template>
       </el-table-column>
 
-      <el-table-column label="Title">
+      <el-table-column :label="$t('article.title')">
         <template slot-scope="{row}">
           <router-link :to="'/example/edit/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
@@ -45,7 +45,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Actions" width="120">
+      <el-table-column align="center" :label="$t('article.actions')" width="120">
         <template slot-scope="scope">
           <router-link :to="'/article/edit/'+scope.row.id">
             <el-button type="primary" size="small" icon="el-icon-edit">
@@ -79,7 +79,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20
+        limit: 100
       }
     }
   },
@@ -93,8 +93,7 @@ export default {
         console.log('response', response)
         this.list = response.data || []
         this.total = this.list.length
-        this.listLoading = false
-      })
+      }).finally(() => { this.listLoading = false })
     }
   }
 }

@@ -11,9 +11,20 @@ export function fetchList() {
 
 export function fetchArticle(id) {
   return request({
-    url: '/article/detail',
-    method: 'get',
-    params: { id }
+    url: `/album/${id}`,
+    method: 'get'
+    // params: { id }
+  })
+}
+
+export function getArticleByCategory(category) {
+  return request({
+    url: 'album/findByCategory',
+    method: 'post',
+    data: {
+      category,
+      status: 0
+    }
   })
 }
 

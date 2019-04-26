@@ -1,6 +1,6 @@
 <template>
   <div class="createPost-container">
-    <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
+    <el-form ref="postForm" v-loading="formLoading" :model="postForm" :rules="rules" class="form-container">
       <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
         <!-- <CommentDropdown v-model="postForm.comment_disabled" />
         <PlatformDropdown v-model="postForm.platforms" />
@@ -8,9 +8,9 @@
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
           发布
         </el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">
+        <!-- <el-button v-loading="loading" type="warning" @click="draftForm">
           草稿
-        </el-button>
+        </el-button> -->
       </sticky>
 
       <div class="createPost-main-container">
@@ -23,6 +23,7 @@
               </el-radio-group>
               <el-form-item style="margin-bottom: 0;" prop="category" label="">
                 <el-cascader
+                  v-model="selectedType"
                   placeholder="请选择文章类型"
                   expand-trigger="hover"
                   :options="typesData"
@@ -39,6 +40,16 @@
                 </el-checkbox-group>
               </div>
             </div>
+            <el-form-item style="margin: 20px 0;" label="文章首页定位:">
+              <el-checkbox
+                v-for="articlePosition in articlePositions"
+                :key="articlePosition.key"
+                v-model="postForm[articlePosition.key]"
+                :label="articlePosition.key"
+              >
+                {{ articlePosition.value }}
+              </el-checkbox>
+            </el-form-item>
             <!-- <el-form-item prop="title">
               <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
                 文章标题
@@ -46,7 +57,7 @@
             </el-form-item> -->
             <div class="article-header">
               <el-form-item style="margin-bottom: 0;" prop="cover" label="">
-                <div class="article-cover background" :style="{backgroundImage: `url(${postForm.cover})`}" @click="coverVisible = true"></div>
+                <div class="article-cover background" :style="{backgroundImage: `url(${qiniuDomain + postForm.cover})`}" @click="coverVisible = true"></div>
                 <!-- <editorImage text="文章封面" @success="setCover"></editorImage> -->
               </el-form-item>
               <div class="article-header-content">
@@ -60,66 +71,75 @@
                 </el-form-item>
               </div>
             </div>
-            <div class="article-module" data-title="图片">
+            <div v-show="checkedArticleModules.includes('image')" class="article-module" data-title="图片">
               <draggable v-model="postForm.images">
                 <div v-for="(item, index) in postForm.images" :key="item.id" class="article-item">
                   <div class="article-item-img" @click="moduleBgClick('image', index)">
                     <div
                       class="background background-ratio"
-                      :style="{backgroundImage: `url(${item.url})`}"
+                      :style="{backgroundImage: `url(${qiniuDomain + item.uri})`}"
                     >
                     </div>
                   </div>
-                  <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  <div class="article-item-content">
+                    <el-input v-model="item.url" placeholder="请输入网络连接"></el-input>
+                    <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  </div>
                   <div class="article-item-control">
-                    <i class="el-icon-close"></i>
+                    <i v-show="closeIconShow('images')" class="el-icon-close" @click="delModule('images', index)"></i>
                     <i class="el-icon-rank handle"></i>
-                    <i class="el-icon-plus" @click="addModulePicture(index)"></i>
+                    <i class="el-icon-plus" @click="addModule('images', index)"></i>
                   </div>
                 </div>
               </draggable>
             </div>
-            <div class="article-module" data-title="视频">
+            <div v-show="checkedArticleModules.includes('video')" class="article-module" data-title="视频">
               <draggable v-model="postForm.videos">
                 <div v-for="(item, index) in postForm.videos" :key="item.id" class="article-item">
                   <div class="article-item-img" @click="moduleBgClick('video', index)">
                     <div
                       class="background background-ratio"
-                      :style="{backgroundImage: `url(${item.url + videoCover})`}"
+                      :style="{backgroundImage: `url(${qiniuDomain + item.uri + videoCover})`}"
                     >
                     </div>
                   </div>
-                  <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  <div class="article-item-content">
+                    <el-input v-model="item.url" placeholder="请输入网络连接"></el-input>
+                    <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  </div>
                   <div class="article-item-control">
-                    <i class="el-icon-close"></i>
+                    <i v-show="closeIconShow('videos')" class="el-icon-close" @click="delModule('videos', index)"></i>
                     <i class="el-icon-rank handle"></i>
-                    <i class="el-icon-plus" @click="addModuleVideo(index)"></i>
+                    <i class="el-icon-plus" @click="addModule('videos', index)"></i>
                   </div>
                 </div>
               </draggable>
             </div>
-            <div class="article-module" data-title="链接">
+            <div v-show="checkedArticleModules.includes('link')" class="article-module" data-title="链接">
               <draggable v-model="postForm.links">
                 <div v-for="(item, index) in postForm.links" :key="item.id" class="article-item">
                   <div class="article-item-img" @click="moduleBgClick('link', index)">
                     <div
                       class="background background-ratio"
-                      :style="{backgroundImage: `url(${item.url})`}"
+                      :style="{backgroundImage: `url(${qiniuDomain + item.uri})`}"
                     >
                     </div>
                   </div>
-                  <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  <div class="article-item-content">
+                    <el-input v-model="item.url" placeholder="请输入网络连接"></el-input>
+                    <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息..."></el-input>
+                  </div>
                   <div class="article-item-control">
-                    <i class="el-icon-close"></i>
+                    <i v-show="closeIconShow('links')" class="el-icon-close" @click="delModule('links', index)"></i>
                     <i class="el-icon-rank handle"></i>
-                    <i class="el-icon-plus" @click="addModuleLink(index)"></i>
+                    <i class="el-icon-plus" @click="addModule('links', index)"></i>
                   </div>
                 </div>
               </draggable>
             </div>
           </el-col>
         </el-row>
-        <el-form-item prop="article" style="margin-bottom: 30px;">
+        <el-form-item v-show="checkedArticleModules.includes('article')" prop="article" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.article" :height="400" />
         </el-form-item>
       </div>
@@ -145,7 +165,7 @@ import Tinymce from '@/components/Tinymce'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky' // 粘性header组件
 // import { validURL } from '@/utils/validate'
-import { fetchArticle } from '@/api/article'
+import { fetchArticle, createArticle, updateArticle } from '@/api/article'
 import { searchUser } from '@/api/remote-search'
 // import { CommentDropdown, PlatformDropdown, SourceUrlDropdown } from './Dropdown'
 import editorImage from '@/components/EditorImage'
@@ -158,7 +178,7 @@ const defaultForm = {
   status: 0,
   title: '', // 文章题目
   cover: '',
-  content: '', // 文章内容
+  // content: '', // 文章内容
   images: [
     {
       id: 0,
@@ -186,7 +206,12 @@ const defaultForm = {
   category: '',
   subcategory: '',
   desc: '',
-  article: ''
+  article: '',
+  isCommend: false, // 一级轮播
+  isSliderTop: false, //  图片置顶轮播区域
+  isImageTop: false, // 图片置顶区域
+  isVideoTop: false, // 视频区域
+  isContentTop: false // 页脚三块
 }
 
 export default {
@@ -210,22 +235,9 @@ export default {
         callback()
       }
     }
-    // const validateSourceUri = (rule, value, callback) => {
-    //   if (value) {
-    //     if (validURL(value)) {
-    //       callback()
-    //     } else {
-    //       this.$message({
-    //         message: '外链url填写不正确',
-    //         type: 'error'
-    //       })
-    //       callback(new Error('外链url填写不正确'))
-    //     }
-    //   } else {
-    //     callback()
-    //   }
-    // }
     return {
+      qiniuDomain,
+      formLoading: false,
       coverVisible: false,
       videoCover,
       articleItemVisible: false,
@@ -251,12 +263,19 @@ export default {
       types: [],
       checkAll: false,
       isIndeterminate: false,
-      checkedArticleModules: [],
+      checkedArticleModules: ['image'],
       articleModules: [
         { key: 'image', value: '图片' },
         { key: 'video', value: '视频' },
         { key: 'link', value: '链接' },
         { key: 'article', value: '文章' }
+      ],
+      articlePositions: [
+        { key: 'isCommend', value: '一级轮播' },
+        { key: 'isSliderTop', value: '图片置顶轮播' },
+        { key: 'isImageTop', value: '图片置顶' },
+        { key: 'isVideoTop', value: '视频区域' },
+        { key: 'isContentTop', value: '页脚三块' }
       ],
       currentArticleModule: ''
     }
@@ -300,22 +319,34 @@ export default {
     this.tempRoute = Object.assign({}, this.$route)
   },
   methods: {
+    closeIconShow(articleModule) {
+      return this.postForm[articleModule].length > 1
+    },
     moduleBgClick(articleModule, index) {
       this.currentArticleModule = articleModule
       this.currentIndex = index
       this.articleItemVisible = true
     },
-    addModuleLink(index) {
-      this.postForm.links.splice(index + 1, 0, { id: this.postForm.links.length, uri: '', url: '', text: '' })
+    delModule(moduleName, index) {
+      this.postForm[moduleName].splice(index, 1)
     },
-    addModuleVideo(index) {
-      this.postForm.videos.splice(index + 1, 0, { id: this.postForm.videos.length, uri: '', url: '', text: '' })
+    addModule(moduleName, index) {
+      const idArr = this.postForm[moduleName].map(item => item.id)
+      const id = Math.max(...idArr) + 1
+
+      this.postForm[moduleName].splice(index + 1, 0, { id, uri: '', url: '', text: '' })
     },
-    addModulePicture(index) {
-      this.postForm.images.splice(index + 1, 0, { id: this.postForm.images.length, uri: '', url: '', text: '' })
-    },
+    // addModuleLink(index) {
+    //   this.postForm.links.splice(index + 1, 0, { id: this.postForm.links.length, uri: '', url: '', text: '' })
+    // },
+    // addModuleVideo(index) {
+    //   this.postForm.videos.splice(index + 1, 0, { id: this.postForm.videos.length, uri: '', url: '', text: '' })
+    // },
+    // addModulePicture(index) {
+    //   this.postForm.images.splice(index + 1, 0, { id: this.postForm.images.length, uri: '', url: '', text: '' })
+    // },
     articleModuleCheckAllChange(val) {
-      this.checkedArticleModules = val ? this.articleModules : []
+      this.checkedArticleModules = val ? this.articleModules.map(item => item.key) : []
       this.isIndeterminate = false
     },
     articleModuleChange(value) {
@@ -330,14 +361,13 @@ export default {
       })
     },
     setArticleItemUrl(key) {
-      const img = qiniuDomain + key
+      // const img = qiniuDomain + key
       this.$set(this.postForm[`${this.currentArticleModule}s`][this.currentIndex], 'uri', key)
-      this.$set(this.postForm[`${this.currentArticleModule}s`][this.currentIndex], 'url', img)
+      // this.$set(this.postForm[`${this.currentArticleModule}s`][this.currentIndex], 'url', img)
       this.articleItemVisible = false
     },
     setCover(key) {
-      const img = qiniuDomain + key
-      this.$set(this.postForm, 'cover', img)
+      this.$set(this.postForm, 'cover', key)
       this.coverVisible = false
     },
     typeChange(value) {
@@ -347,17 +377,51 @@ export default {
       this.$set(this.postForm, 'subcategory', subcategory)
     },
     fetchData(id) {
+      this.formLoading = true
       fetchArticle(id).then(response => {
-        this.postForm = response.data
+        const data = response && response.data || {}
+        console.log('data', data)
         // Just for test
-        this.postForm.title += `   Article Id:${this.postForm.id}`
-        this.postForm.content_short += `   Article Id:${this.postForm.id}`
+        // this.postForm.title += `   Article Id:${this.postForm.id}`
+        // this.postForm.content_short += `   Article Id:${this.postForm.id}`
+        this.postForm.id = data['_id']
+        Object.keys(data).forEach(key => {
+          let val = data[key]
+          const hasKey = this.postForm.hasOwnProperty(key)
 
+          if (!val || !hasKey) return
+          const modules = this.articleModules.map(item => item.key + 's')
+          if (modules.includes(key)) {
+            if (!val.length) return
+
+            val = val.map(item => {
+              item.id = item.order
+              delete item.order
+              return item
+            })
+
+            const realyKey = key.slice(0, -1)
+            if (!this.checkedArticleModules.includes(realyKey)) this.checkedArticleModules.push(realyKey)
+          }
+          if (key === 'article') if (!this.checkedArticleModules.includes(key)) this.checkedArticleModules.push(key)
+          if (key === 'category') {
+            val = val.category
+            this.selectedType.splice(0, 1, val)
+          }
+          if (key === 'subcategory') {
+            val = val.subcategory
+            this.selectedType.splice(1, 1, val)
+          }
+
+          this.$set(this.postForm, key, val)
+        })
+
+        console.log('postForm', this.postForm)
         // Set tagsview title
         this.setTagsViewTitle()
       }).catch(err => {
         console.log(err)
-      })
+      }).finally(() => { this.formLoading = false })
     },
     setTagsViewTitle() {
       const title = this.lang === 'zh' ? '编辑文章' : 'Edit Article'
@@ -366,18 +430,53 @@ export default {
     },
     submitForm() {
       // this.postForm.display_time = parseInt(this.display_time / 1000)
-      console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
-          this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
+          // const submitData = { ...this.postForm }
+          const submitData = JSON.parse(JSON.stringify(this.postForm))
+          const modules = this.articleModules.map(item => item.key)
+          modules.forEach(key => {
+            const isArticle = key === 'article'
+            const realyKey = isArticle ? key : key + 's'
+            if (!this.checkedArticleModules.includes(key)) {
+              delete submitData[realyKey]
+            } else {
+              if (isArticle) return
+              submitData[realyKey].map(item => {
+                item.order = item.id
+                delete item.id
+                return item
+              })
+            }
           })
+          console.log('submitData', submitData)
+
+          this.loading = true
+          const api = this.isEdit ? updateArticle : createArticle
+          const hint = this.isEdit ? '修改' : '发布'
+          api(submitData)
+            .then(resp => {
+              if (resp && !resp.success) throw new Error('err')
+              this.$notify({
+                title: '成功',
+                message: `${hint}文章成功`,
+                type: 'success',
+                duration: 2000
+              })
+              this.$router.replace('/article/list')
+            })
+            .catch(() => {
+              this.$notify({
+                title: '失败',
+                message: `${hint}文章失败`,
+                type: 'error',
+                duration: 2000
+              })
+            })
+            .finally(() => {
+              this.loading = false
+            })
           // this.postForm.status = 'published'
-          this.loading = false
         } else {
           console.log('error submit!!')
           return false
@@ -495,7 +594,7 @@ export default {
   &-img{
     position: relative;
     margin-right: 20px;
-    flex: 0 0 100px;
+    flex: 0 0 150px;
     background-color: #fff;
     &::before{
       content: '点击上传';
@@ -506,16 +605,30 @@ export default {
       font-size: 14px;
       white-space: nowrap;
     }
+    .background{
+      height: 100%;
+      padding: 0;
+    }
+  }
+  &-content{
+    flex: 1;
+    &>*:first-child{
+      margin-bottom: 10px;
+    }
   }
   &-control{
     padding: 0 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    // justify-content: space-between;Z
+    justify-content: center;
     font-size: 20px;
     color: #bbb;
     &>i{
       cursor: pointer;
+      &:not(:last-child){
+        margin-bottom: 7px;
+      }
     }
     &>i:hover{
       color: blue;

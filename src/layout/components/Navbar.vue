@@ -31,9 +31,9 @@
               {{ $t('navbar.dashboard') }}
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">
+          <a target="_blank" href="http://foto2.cn/">
             <el-dropdown-item>
-              {{ $t('navbar.github') }}
+              {{ '网站地址' }}
             </el-dropdown-item>
           </a>
           <el-dropdown-item divided>

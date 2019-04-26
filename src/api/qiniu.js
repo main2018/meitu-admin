@@ -30,7 +30,8 @@ export async function qiniuUpload(file, progress = () => {}) {
   // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
   // await _loadScript()
   // const fileNames = file.name.split('.')
-  const spaceReg = /\s/g
+  // const spaceReg = /\s/g
+  const spaceReg = /\s|\(|\)/g
   let key = Date.now() + makeRandom() + file.name.replace(spaceReg, '')
   // let key = encodeURI(fileNames[0] + Date.now() + makeRandom()) + '.' + fileNames[1]
   
