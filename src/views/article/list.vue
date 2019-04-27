@@ -1,6 +1,17 @@
 <template>
   <div class="app-container">
-    <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
+    <div class="article-list-header">
+      <el-select v-model="currentType" placeholder="请选择">
+        <el-option
+          v-for="item in selectTypeData"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        >
+        </el-option>
+      </el-select>
+    </div>
+    <el-table v-loading="listLoading" :data="tabelData" border fit highlight-current-row style="width: 100%">
       <el-table-column
         align="center"
         type="index"
@@ -39,7 +50,7 @@
 
       <el-table-column :label="$t('article.title')">
         <template slot-scope="{row}">
-          <router-link :to="'/example/edit/'+row.id" class="link-type">
+          <router-link :to="'/article/edit/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
           </router-link>
         </template>
@@ -56,17 +67,19 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <!-- <pagination v-show="total>0" :total="total" :page-size="100" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" /> -->
   </div>
 </template>
 
 <script>
 import { fetchList } from '@/api/article'
-import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
+// import Pagination from '@/components/Pagination'
+import { getTypes } from '@/api/types'
+import { sortCompare } from '@/utils'
 
 export default {
   name: 'ArticleList',
-  components: { Pagination },
+  // components: { Pagination },
   filters: {
     statusFilter(status) {
       return ['显示', '隐藏'][status]
@@ -80,17 +93,41 @@ export default {
       listQuery: {
         page: 1,
         limit: 100
-      }
+      },
+      types: [],
+      currentType: ''
+    }
+  },
+  computed: {
+    selectTypeData() {
+      const list = this.types.map(type => {
+        return {
+          value: type.category,
+          label: type.name
+        }
+      })
+      return [{ value: '', label: '全部' }, ...list]
+    },
+    tabelData() {
+      if (!this.currentType) return this.list
+      return this.list.filter(item => item.category === this.currentType)
     }
   },
   created() {
+    this.getTypes()
     this.getList()
   },
   methods: {
+    getTypes() {
+      getTypes().then(res => {
+        const _list = res && res.data || []
+        this.types = _list.sort(sortCompare('order'))
+      }).finally(() => { this.listLoading = false })
+    },
     getList() {
       this.listLoading = true
       fetchList().then(response => {
-        console.log('response', response)
+        // console.log('response', response)
         this.list = response.data || []
         this.total = this.list.length
       }).finally(() => { this.listLoading = false })
@@ -107,5 +144,8 @@ export default {
   position: absolute;
   right: 15px;
   top: 10px;
+}
+.article-list-header{
+  padding: 20px 0;
 }
 </style>
