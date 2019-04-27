@@ -73,15 +73,16 @@ export const constantRoutes = [
   {
     path: '',
     component: Layout,
-    redirect: 'dashboard',
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', noCache: true, affix: true }
-      }
-    ]
+    redirect: '/article/list'
+    // redirect: 'dashboard',
+    // children: [
+    //   {
+    //     path: 'dashboard',
+    //     component: () => import('@/views/dashboard/index'),
+    //     name: 'Dashboard',
+    //     meta: { title: 'dashboard', icon: 'dashboard', noCache: true, affix: true }
+    //   }
+    // ]
   }
   // {
   //   path: '/documentation',
@@ -462,7 +463,7 @@ export const asyncRoutes = [
 ]
 
 const createRouter = () => new Router({
-  // mode: 'history', // require service support
+  mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
