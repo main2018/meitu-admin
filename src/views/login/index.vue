@@ -2,7 +2,7 @@
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
-      <div class="title-container">
+      <div class="title-container" style="visibility: hidden;">
         <h3 class="title">
           {{ $t('login.title') }}
         </h3>
@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
+// import { validUsername } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
 import SocialSign from './components/SocialSignin'
 
@@ -88,14 +88,17 @@ export default {
   components: { LangSelect, SocialSign },
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
+      if (!value) return callback(new Error('用户名不能为空'))
+      return callback()
+      // if (!validUsername(value)) {
+      //   callback(new Error('Please enter the correct user name'))
+      // } else {
+      //   callback()
+      // }
     }
     const validatePassword = (rule, value, callback) => {
-      callback()
+      if (!value) return callback(new Error('密码不能为空'))
+      return callback()
       // if (value.length < 6) {
       //   callback(new Error('The password can not be less than 6 digits'))
       // } else {
@@ -104,8 +107,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '123'
+        username: '',
+        password: ''
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -168,7 +171,6 @@ export default {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
-              console.log('1111111111111')
               this.$router.push({ path: this.redirect || '/' })
               this.loading = false
             })

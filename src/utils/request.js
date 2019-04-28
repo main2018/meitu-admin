@@ -52,9 +52,9 @@ service.interceptors.response.use(
     const code = response.code || response.status
 
     // if the custom code is not 20000, it is judged as an error.
-    if (code !== (isMock ? 20000 : 200)) {
+    if (code !== (isMock ? 20000 : 200) || !res || !res.success) {
       Message({
-        message: res.message || 'error',
+        message: res && res.msg || 'error',
         type: 'error',
         duration: 5 * 1000
       })

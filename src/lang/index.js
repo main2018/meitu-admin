@@ -33,7 +33,8 @@ export function getLanguage() {
   const locales = Object.keys(messages)
   for (const locale of locales) {
     if (language.indexOf(locale) > -1) {
-      return locale
+      // return locale
+      return 'zh'
     }
   }
   return 'zh'
