@@ -7,7 +7,8 @@
     </sticky>
     <el-form ref="postForm" v-loading="formLoading" :model="postForm" :rules="rules" class="container-form" label-width="80px">
       <el-form-item label="介绍文本" prop="introduce">
-        <el-input v-model="postForm.introduce" placeholder="请填写介绍文本"></el-input>
+        <!-- <el-input v-model="postForm.introduce" placeholder="请填写介绍文本"></el-input> -->
+        <Tinymce v-model="postForm.introduce" :upload-show="false" :height="200" />
       </el-form-item>
       <el-form-item label="联系电话" prop="tel">
         <el-input v-model="postForm.tel" placeholder="请填写联系电话"></el-input>
@@ -35,6 +36,7 @@
 <script type='text/ecmascript-6'>
 import Sticky from '@/components/Sticky' // 粘性header组件
 import editorImage from '@/components/EditorImage'
+import Tinymce from '@/components/Tinymce'
 
 import { getAboutUs, updateAboutUs } from '@/api/about-us'
 import { qiniuDomain } from 'config/qiniu'
@@ -52,7 +54,8 @@ const defaultForm = {
 export default {
   components: {
     Sticky,
-    editorImage
+    editorImage,
+    Tinymce
   },
   data() {
     return {
@@ -90,7 +93,7 @@ export default {
     submitForm() {
       this.$refs.postForm.validate((valid, result) => {
         if (valid) {
-          console.log('postForm', this.postForm)
+          // console.log('postForm', this.postForm)
           this.formLoading = true
           updateAboutUs(this.postForm).then(resp => {
             if (resp && !resp.success) throw new Error('err')
@@ -113,7 +116,6 @@ export default {
     getAbout() {
       this.formLoading = true
       getAboutUs().then(resp => {
-        console.log('getAboutUs', resp)
         this.initPostForm(resp && resp.data)
       }).finally(() => { this.formLoading = false })
     },
