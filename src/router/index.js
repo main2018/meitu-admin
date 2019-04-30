@@ -412,13 +412,13 @@ export const asyncRoutes = [
         path: 'list',
         component: () => import('@/views/article/list'),
         name: 'ArticleList',
-        meta: { title: 'articleList', icon: 'list' }
+        meta: { title: 'articleList', icon: 'list', noCache: true }
       },
       {
         path: 'types',
         component: () => import('@/views/article/types'),
         name: 'ArticleTypes',
-        meta: { title: 'articleTypes', icon: 'list' }
+        meta: { title: 'articleTypes', icon: 'nested' }
       }
     ]
   },

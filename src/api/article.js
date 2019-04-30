@@ -2,9 +2,26 @@ import request from '@/utils/request'
 
 export function fetchList() {
   return request({
-    url: '/album',
+    url: '/album/all',
     method: 'get'
 
+    // params: query
+  })
+}
+
+export function delArticle(id) {
+  return request({
+    url: '/album/del',
+    method: 'post',
+    data: { id }
+    // params: query
+  })
+}
+
+export function fetchShowList() {
+  return request({
+    url: '/album',
+    method: 'get'
     // params: query
   })
 }

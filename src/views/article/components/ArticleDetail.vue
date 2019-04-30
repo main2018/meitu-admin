@@ -18,6 +18,7 @@
           <el-col :span="24">
             <div class="article-base">
               <el-radio-group v-model="postForm.status">
+                <el-radio :label="-1">删除</el-radio>
                 <el-radio :label="0">显示</el-radio>
                 <el-radio :label="1">隐藏</el-radio>
               </el-radio-group>

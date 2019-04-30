@@ -4,6 +4,7 @@ var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
 var router = express.Router()
 var axios = require('axios')
+const qs = require('qs')
 const REMOTE_ADDRESS = 'http://112.74.47.86:3000'
 
 app.use(bodyParser.json())
@@ -19,7 +20,8 @@ router.get('/dispatch/*', function(req, res, next) {
 })
 
 function ajax(method, req, res) {
-  var data = method === 'POST' ? req.body : null
+  // var data = method === 'POST' ? req.body : null
+  var data = method === 'POST' ? qs.stringify(req.body) : null
   const url = REMOTE_ADDRESS + req.path.replace('/dispatch', '')
   const accessToken = req.cookies.accessToken || ''
   axios({
