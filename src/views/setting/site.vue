@@ -23,6 +23,9 @@
           <editorImage :list="_normalizeList([postForm.logo])" @success="setLogo"></editorImage>
         </el-form-item>
       </div>
+      <el-form-item label="图片高度" prop="imgHeight">
+        <el-input v-model="postForm.imgHeight" type="number" placeholder="请填写图片高度" min="50" max="500"></el-input>
+      </el-form-item>
     </el-form>
   </section>
 </template>
@@ -38,7 +41,8 @@ const defaultForm = {
   logo: '',
   address: '',
   tel: '',
-  email: ''
+  email: '',
+  imgHeight: ''
 }
 
 export default {
@@ -47,6 +51,13 @@ export default {
     editorImage
   },
   data() {
+    var validateImgHeight = (rule, value, callback) => {
+      if (value < 50 || value > 500) {
+        callback(new Error('图片高度范围为：50~500'))
+      } else {
+        callback()
+      }
+    }
     return {
       loading: false,
       formLoading: false,
@@ -56,7 +67,8 @@ export default {
         logo: [{ required: true, message: '请上传网站logo', trigger: 'blur' }],
         address: [{ required: true, message: '请填写联系地址', trigger: 'blur' }],
         tel: [{ required: true, message: '请填写联系电话', trigger: 'blur' }],
-        email: [{ required: true, message: '请填写联系邮箱', trigger: 'blur' }]
+        email: [{ required: true, message: '请填写联系邮箱', trigger: 'blur' }],
+        imgHeight: [{ validator: validateImgHeight, trigger: 'blur' }]
       }
     }
   },
