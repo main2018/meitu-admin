@@ -26,12 +26,41 @@
       <el-form-item label="图片高度" prop="imgHeight">
         <el-input v-model="postForm.imgHeight" type="number" placeholder="请填写图片高度" min="50" max="500"></el-input>
       </el-form-item>
+      <el-form-item label="网站说明" prop="type">
+        <draggable v-model="postForm.type">
+          <div v-for="(item, index) in postForm.type" :key="item.id" class="article-item">
+            <div class="article-item-img" @click="currentIndex = index; dialogVisible = true">
+              <div
+                class="background background-ratio"
+                :style="{backgroundImage: `url(${qiniuDomain + item.icon})`}"
+              >
+              </div>
+            </div>
+            <div class="article-item-content">
+              <el-input v-model="item.title" placeholder="请输入标题"></el-input>
+              <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息...以空格隔开"></el-input>
+            </div>
+            <div class="article-item-control">
+              <i v-show="postForm.type.length > 1" class="el-icon-close" @click="delType(index)"></i>
+              <i class="el-icon-rank handle"></i>
+              <i class="el-icon-plus" @click="addType(index)"></i>
+            </div>
+          </div>
+        </draggable>
+      </el-form-item>
     </el-form>
+    <el-dialog :visible.sync="dialogVisible">
+      <editorImage v-if="dialogVisible" @success="setArticleItemUrl"></editorImage>
+      <span slot="footer" class="dialog-footer">
+        <!-- <el-button type="primary" :disabled="!cover" @click="saveCover">确 定</el-button> -->
+      </span>
+    </el-dialog>
   </section>
 </template>
 <script type='text/ecmascript-6'>
 import Sticky from '@/components/Sticky' // 粘性header组件
 import editorImage from '@/components/EditorImage'
+import draggable from '@/components/Draggable'
 
 import { getSite, updateSite } from '@/api/site'
 import { qiniuDomain } from 'config/qiniu'
@@ -42,13 +71,22 @@ const defaultForm = {
   address: '',
   tel: '',
   email: '',
+  type: [
+    {
+      id: 0,
+      icon: '',
+      title: '',
+      text: ''
+    }
+  ],
   imgHeight: ''
 }
 
 export default {
   components: {
     Sticky,
-    editorImage
+    editorImage,
+    draggable
   },
   data() {
     var validateImgHeight = (rule, value, callback) => {
@@ -59,6 +97,7 @@ export default {
       }
     }
     return {
+      qiniuDomain,
       loading: false,
       formLoading: false,
       postForm: Object.assign({}, defaultForm),
@@ -69,13 +108,29 @@ export default {
         tel: [{ required: true, message: '请填写联系电话', trigger: 'blur' }],
         email: [{ required: true, message: '请填写联系邮箱', trigger: 'blur' }],
         imgHeight: [{ validator: validateImgHeight, trigger: 'blur' }]
-      }
+      },
+      currentIndex: 0,
+      dialogVisible: false
     }
   },
   created() {
     this.getSite()
   },
   methods: {
+    addType(index) {
+      const idArr = this.postForm.type.map(item => item.id)
+      const id = Math.max(...idArr) + 1
+
+      this.postForm.type.splice(index + 1, 0, { id, icon: '', title: '', text: '' })
+    },
+    delType(index) {
+      this.postForm.type.splice(index, 1)
+    },
+    setArticleItemUrl(key) {
+      // const img = qiniuDomain + key
+      this.$set(this.postForm.type[this.currentIndex], 'icon', key)
+      this.dialogVisible = false
+    },
     setLogo(key) {
       this.postForm.logo = key
     },
@@ -131,5 +186,53 @@ export default {
 }
 </script>
 
-<style lang='sass' scoped>
+<style lang='scss' scoped>
+.article-item{
+  padding: 10px 0 10px 10px;
+  display: flex;
+  background-color: #eee;
+  &-img{
+    position: relative;
+    margin-right: 20px;
+    flex: 0 0 150px;
+    background-color: #fff;
+    &::before{
+      content: '点击上传';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .background{
+      height: 100%;
+      padding: 0;
+    }
+  }
+  &-content{
+    flex: 1;
+    &>*:first-child{
+      margin-bottom: 10px;
+    }
+  }
+  &-control{
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    // justify-content: space-between;Z
+    justify-content: center;
+    font-size: 20px;
+    color: #bbb;
+    &>i{
+      cursor: pointer;
+      &:not(:last-child){
+        margin-bottom: 7px;
+      }
+    }
+    &>i:hover{
+      color: blue;
+    }
+  }
+}
 </style>

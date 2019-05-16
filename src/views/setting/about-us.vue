@@ -19,6 +19,10 @@
       <el-form-item label="联系地址" prop="address">
         <el-input v-model="postForm.address" placeholder="请填写联系地址"></el-input>
       </el-form-item>
+      <el-form-item label="地图坐标" prop="map">
+        <el-input v-model="postForm.map" placeholder="请填写地图坐标 如：110.342949,20.029068"></el-input>
+        <a class="map-location" href="https://lbs.amap.com/console/show/picker" target="_blank">地图坐标获取</a>
+      </el-form-item>
       <div v-if="!formLoading" class="upload-group">
         <el-form-item label="介绍插图" prop="illustrate">
           <editorImage :list="_normalizeList([postForm.illustrate])" @success="setIllustrate"></editorImage>
@@ -26,9 +30,9 @@
         <el-form-item label="轮播图片" prop="images">
           <editorImage :list="_normalizeList(postForm.images)" :limit="0" @success="setImagesUrl" @remove="removeImage"></editorImage>
         </el-form-item>
-        <el-form-item label="地图插图" prop="map">
+        <!-- <el-form-item label="地图插图" prop="map">
           <editorImage :list="_normalizeList([postForm.map])" @success="setMap"></editorImage>
-        </el-form-item>
+        </el-form-item> -->
       </div>
     </el-form>
   </section>
@@ -66,7 +70,7 @@ export default {
         introduce: [{ required: true, message: '请输入介绍文本', trigger: 'blur' }],
         illustrate: [{ required: true, message: '请上传介绍插图', trigger: 'blur' }],
         images: [{ required: true, message: '请上传轮播图', trigger: 'blur' }],
-        map: [{ required: true, message: '请上传地图图片', trigger: 'blur' }],
+        map: [{ required: true, message: '请填写地图坐标', trigger: 'blur' }],
         tel: [{ required: true, message: '请填写联系电话', trigger: 'blur' }],
         email: [{ required: true, message: '请填写联系邮箱', trigger: 'blur' }],
         address: [{ required: true, message: '请填写联系地址', trigger: 'blur' }]
@@ -142,4 +146,10 @@ export default {
 </script>
 
 <style lang='sass' scoped>
+.map-location
+  top: 0
+  right: 5px
+  position: absolute
+  color: green
+  text-decoration: underline
 </style>
