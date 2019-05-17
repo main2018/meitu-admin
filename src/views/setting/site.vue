@@ -38,7 +38,7 @@
             </div>
             <div class="article-item-content">
               <el-input v-model="item.title" placeholder="请输入标题"></el-input>
-              <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息...以空格隔开"></el-input>
+              <el-input v-model="item.text" type="textarea" :rows="3" resize="none" placeholder="请填写描述信息...以换行符隔开"></el-input>
             </div>
             <div class="article-item-control">
               <i v-show="postForm.type.length > 1" class="el-icon-close" @click="delType(index)"></i>
@@ -170,6 +170,7 @@ export default {
       Object.keys(this.postForm).forEach(key => {
         const hasKey = data.hasOwnProperty(key)
         if (!hasKey) return
+        if (key === 'type' && (!data[key] || !data[key].length)) return
 
         this.$set(this.postForm, key, data[key])
       })
