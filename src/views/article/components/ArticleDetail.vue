@@ -212,7 +212,11 @@ const defaultForm = {
   isSliderTop: false, //  图片置顶轮播区域
   isImageTop: false, // 图片置顶区域
   isVideoTop: false, // 视频区域
-  isContentTop: false // 页脚三块
+  isContentTop: false, // 页脚三块
+  hasImage: true,
+  hasVideo: false,
+  hasLink: false,
+  hasArticle: false
 }
 
 export default {
@@ -390,8 +394,26 @@ export default {
           let val = data[key]
           const hasKey = this.postForm.hasOwnProperty(key)
 
-          if (!val || !hasKey) return
+          // if (!val || !hasKey) return
+          if (!hasKey) return
           const modules = this.articleModules.map(item => item.key + 's')
+
+          const hasArr = [
+            ['hasImage', 'image'],
+            ['hasVideo', 'video'],
+            ['hasLink', 'link'],
+            ['hasArticle', 'article']
+          ]
+          hasArr.forEach(item => {
+            // const index = this.checkedArticleModules.findIndex(item[1])
+
+            if (item[0] === key) {
+              if (val) {
+                if (!this.checkedArticleModules.includes(item[1])) this.checkedArticleModules.push(item[1])
+              }
+            }
+          })
+
           if (modules.includes(key)) {
             if (!val.length) return
 
@@ -401,16 +423,17 @@ export default {
               return item
             })
 
-            const realyKey = key.slice(0, -1)
-            if (!this.checkedArticleModules.includes(realyKey)) this.checkedArticleModules.push(realyKey)
+            // const realyKey = key.slice(0, -1)
+            // if (!this.checkedArticleModules.includes(realyKey)) this.checkedArticleModules.push(realyKey)
           }
-          if (key === 'article') if (!this.checkedArticleModules.includes(key)) this.checkedArticleModules.push(key)
+          // if (key === 'article') if (!this.checkedArticleModules.includes(key)) this.checkedArticleModules.push(key)
+
           if (key === 'category') {
             val = val.category
             this.selectedType.splice(0, 1, val)
           }
           if (key === 'subcategory') {
-            val = val.subcategory
+            val = val && val.subcategory
             this.selectedType.splice(1, 1, val)
           }
 
@@ -431,6 +454,9 @@ export default {
 
       this.$store.dispatch('tagsView/updateVisitedView', route)
     },
+    firstUpperCase(str) {
+      return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())
+    },
     submitForm() {
       // this.postForm.display_time = parseInt(this.display_time / 1000)
       this.$refs.postForm.validate(valid => {
@@ -442,8 +468,10 @@ export default {
             const isArticle = key === 'article'
             const realyKey = isArticle ? key : key + 's'
             if (!this.checkedArticleModules.includes(key)) {
+              submitData[`has${this.firstUpperCase(key)}`] = false
               delete submitData[realyKey]
             } else {
+              submitData[`has${this.firstUpperCase(key)}`] = true
               if (isArticle) return
               submitData[realyKey].map(item => {
                 item.order = item.id

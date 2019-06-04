@@ -51,9 +51,9 @@
     </el-form>
     <el-dialog :visible.sync="dialogVisible">
       <editorImage v-if="dialogVisible" @success="setArticleItemUrl"></editorImage>
-      <span slot="footer" class="dialog-footer">
-        <!-- <el-button type="primary" :disabled="!cover" @click="saveCover">确 定</el-button> -->
-      </span>
+      <!-- <span slot="footer" class="dialog-footer">
+        <el-button type="primary" :disabled="!cover" @click="saveCover">确 定</el-button>
+      </span>  -->
     </el-dialog>
   </section>
 </template>
