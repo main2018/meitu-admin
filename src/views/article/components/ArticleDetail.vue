@@ -405,11 +405,13 @@ export default {
             ['hasArticle', 'article']
           ]
           hasArr.forEach(item => {
-            // const index = this.checkedArticleModules.findIndex(item[1])
+            const index = this.checkedArticleModules.findIndex(item => item === item[1])
 
             if (item[0] === key) {
               if (val) {
                 if (!this.checkedArticleModules.includes(item[1])) this.checkedArticleModules.push(item[1])
+              } else {
+                if (this.checkedArticleModules.includes(item[1])) this.checkedArticleModules.splice(index, 1)
               }
             }
           })
