@@ -276,11 +276,11 @@ export default {
         { key: 'article', value: '文章' }
       ],
       articlePositions: [
-        { key: 'isCommend', value: '一级轮播' },
-        { key: 'isSliderTop', value: '图片置顶轮播' },
-        { key: 'isImageTop', value: '图片置顶' },
-        { key: 'isVideoTop', value: '视频区域' },
-        { key: 'isContentTop', value: '页脚三块' }
+        { key: 'isCommend', value: '置顶轮播' },
+        { key: 'isSliderTop', value: '一级轮播' },
+        { key: 'isImageTop', value: '一级置顶' },
+        { key: 'isVideoTop', value: '视频置顶' },
+        { key: 'isContentTop', value: '页脚置顶' }
       ],
       currentArticleModule: ''
     }
@@ -420,7 +420,7 @@ export default {
             if (!val.length) return
 
             val = val.map(item => {
-              item.id = item.order
+              item.id = item.order || 0
               delete item.order
               return item
             })

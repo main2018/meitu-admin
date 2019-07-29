@@ -178,6 +178,7 @@ export default {
   article: {
     status: '状态',
     title: '标题',
+    position: '位置',
     actions: '操作'
   }
 }

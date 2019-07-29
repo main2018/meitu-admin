@@ -11,7 +11,7 @@
         >
         </el-option>
       </el-select>
-      <div class="article-list-header-eys" :style="{color: isEyeActive ? 'red' : ''}">
+      <!-- <div class="article-list-header-eys" :style="{color: isEyeActive ? 'red' : ''}">
         <el-tooltip effect="dark" :content="`展示${eyeOpen ? '隐藏' : '显示'}的文章`" placement="top">
           <svg-icon :icon-class="eyeOpen ? 'eye-open' : 'eye'" @click="isDelActive = false; isEyeActive = true; eyeOpen = !eyeOpen" />
         </el-tooltip>
@@ -20,7 +20,13 @@
         <el-tooltip effect="dark" :content="`展示${isDelActive ? '全部' : '删除'}的文章`" placement="top">
           <i class="el-icon-delete" @click="isEyeActive = false; isDelActive = !isDelActive;" />
         </el-tooltip>
-      </div>
+      </div> -->
+      <el-radio-group v-model="status" style="margin-left: 20px">
+        <el-radio-button :label="-2">全部</el-radio-button>
+        <el-radio-button :label="0">显示</el-radio-button>
+        <el-radio-button :label="1">隐藏</el-radio-button>
+        <el-radio-button :label="-1">删除</el-radio-button>
+      </el-radio-group>
     </div>
     <el-table v-loading="listLoading" :data="tabelData" border fit highlight-current-row style="width: 100%">
       <el-table-column
@@ -53,17 +59,21 @@
         </template>
       </el-table-column> -->
 
-      <el-table-column class-name="status-col" :label="$t('article.status')" width="100">
-        <template slot-scope="{row}">
-          {{ row.status | statusFilter }}
-        </template>
-      </el-table-column>
-
       <el-table-column :label="$t('article.title')">
         <template slot-scope="{row}">
           <router-link :to="'/article/edit/'+row.id" class="link-type">
             <span>{{ row.title }}</span>
           </router-link>
+        </template>
+      </el-table-column>
+      <el-table-column class-name="status-col" :label="$t('article.position')" width="100">
+        <template slot-scope="{row}">
+          <p style="white-space:pre;margin: 0;">{{ row | positionFilter }}</p>
+        </template>
+      </el-table-column>
+      <el-table-column class-name="status-col" :label="$t('article.status')" width="100">
+        <template slot-scope="{row}">
+          {{ row.status | statusFilter }}
         </template>
       </el-table-column>
 
@@ -99,6 +109,18 @@ export default {
       if (status === -1) return '删除'
 
       return ['显示', '隐藏'][status]
+    },
+    positionFilter(row) {
+      const { isCommend, isSliderTop, isImageTop, isVideoTop, isContentTop } = row || {}
+      const arr = [
+        { text: '置顶轮播', is: isCommend },
+        { text: '一级轮播', is: isSliderTop },
+        { text: '一级置顶', is: isImageTop },
+        { text: '视频置顶', is: isVideoTop },
+        { text: '页脚置顶', is: isContentTop }
+      ]
+
+      return arr.filter(item => item.is).reduce((total, curr) => `${total ? `${total}\n` : ''}${curr.text}`, '')
     }
   },
   data() {
@@ -115,7 +137,8 @@ export default {
       },
       types: [],
       currentType: '',
-      currentId: ''
+      currentId: '',
+      status: 0
     }
   },
   computed: {
@@ -126,20 +149,21 @@ export default {
           label: type.name
         }
       })
-      return [{ value: '', label: '全部' }, ...list]
+      return [{ value: '', label: '全部类型' }, ...list]
     },
     tabelData() {
-      let res = this.currentType ? this.list.filter(item => item.category === this.currentType) : this.list
+      if (!this.list) return []
+      const res = this.currentType ? this.list.filter(item => item.category === this.currentType) : this.list
 
-      if (this.isEyeActive) {
-        const status = this.eyeOpen ? 0 : 1
-        res = res.filter(item => item.status === status)
-      }
-      if (this.isDelActive) {
-        const status = -1
-        res = res.filter(item => item.status === status)
-      }
-      return res
+      // if (this.isEyeActive) {
+      //   const status = this.eyeOpen ? 0 : 1
+      //   res = res.filter(item => item.status === status)
+      // }
+      // if (this.isDelActive) {
+      //   const status = -1
+      //   res = res.filter(item => item.status === status)
+      // }
+      return res.filter(item => this.status === -2 ? true : item.status === this.status)
     }
   },
   created() {
