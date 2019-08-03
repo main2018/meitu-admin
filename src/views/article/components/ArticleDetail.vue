@@ -315,7 +315,9 @@ export default {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
     } else {
-      this.postForm = Object.assign({}, defaultForm)
+      const article = this.initData()
+      this.postForm = Object.assign({}, defaultForm, article)
+      // this.postForm = Object.assign({}, defaultForm)
     }
 
     // Why need to make a copy of this.$route here?
@@ -323,7 +325,23 @@ export default {
     // https://github.com/PanJiaChen/vue-element-admin/issues/1221
     this.tempRoute = Object.assign({}, this.$route)
   },
+  beforeDestroy() {
+    const data = { ...this.postForm }
+    data.checkedArticleModules = this.checkedArticleModules
+
+    if (!this.isEdit) sessionStorage.setItem('article', JSON.stringify(data))
+  },
   methods: {
+    initData() {
+      const article = JSON.parse(sessionStorage.getItem('article') || '{}')
+
+      if (article.category) this.selectedType.splice(0, 1, article.category)
+      if (article.subcategory) this.selectedType.splice(1, 1, article.subcategory)
+      if (article.checkedArticleModules && article.checkedArticleModules.length) this.checkedArticleModules = article.checkedArticleModules
+      delete article.checkedArticleModules
+
+      return article
+    },
     closeIconShow(articleModule) {
       return this.postForm[articleModule].length > 1
     },
@@ -362,7 +380,6 @@ export default {
     getTypes() {
       getTypes().then(res => {
         this.types = res && res.data || []
-        console.log('types:', this.types)
       })
     },
     setArticleItemUrl(key) {
