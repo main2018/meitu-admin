@@ -242,6 +242,7 @@ export default {
     }
     return {
       qiniuDomain,
+      isPublished: false,
       formLoading: false,
       coverVisible: false,
       videoCover,
@@ -329,7 +330,9 @@ export default {
     const data = { ...this.postForm }
     data.checkedArticleModules = this.checkedArticleModules
 
-    if (!this.isEdit) sessionStorage.setItem('article', JSON.stringify(data))
+    if (this.isEdit) return
+    if (this.isPublished) sessionStorage.removeItem('article')
+    else sessionStorage.setItem('article', JSON.stringify(data))
   },
   methods: {
     initData() {
@@ -513,6 +516,7 @@ export default {
                 type: 'success',
                 duration: 2000
               })
+              this.isPublished = true
               this.$router.replace('/article/list')
             })
             .catch(() => {
